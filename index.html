@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Física Interativa</title>
+  
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #F3F4F6;
+      color: #1F2937;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #0A192F;
+      color: #ffffff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    .logo-icon { color: #2563EB; font-size: 1.8rem; }
+
+    nav { display: flex; gap: 1rem; }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: #D1D5DB;
+      padding: 0.5rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      color: #ffffff;
+      background-color: #2563EB;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #0A192F 0%, #1E3A8A 100%);
+      color: #ffffff;
+      padding: 3rem 2rem;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .hero h1 { font-size: 2.2rem; margin-bottom: 0.75rem; }
+    .hero p { color: #E5E7EB; font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+
+    .tab-content {
+      display: none;
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border: 1px solid #E5E7EB;
+    }
+
+    .tab-content.active { display: block; }
+
+    .section-title {
+      font-size: 1.5rem;
+      color: #0A192F;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #2563EB;
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .card {
+      background-color: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      border-color: #2563EB;
+    }
+
+    .card h3 { color: #0A192F; margin-bottom: 0.5rem; }
+    .card p { color: #4B5563; font-size: 0.9rem; margin-bottom: 1rem; }
+
+    .action-btn {
+      display: inline-block;
+      text-decoration: none;
+      background-color: #2563EB;
+      color: #ffffff;
+      border: none;
+      padding: 0.5rem 1.25rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .action-btn:hover { background-color: #1D4ED8; }
+
+    .calc-menu {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      justify-content: center;
+    }
+
+    .calc-menu-btn {
+      background-color: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      color: #334155;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .calc-menu-btn:hover, .calc-menu-btn.active {
+      background-color: #2563EB;
+      border-color: #2563EB;
+      color: #ffffff;
+    }
+
+    .calc-subtab { display: none; }
+    .calc-subtab.active { display: block; }
+
+    .calc-container {
+      max-width: 550px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background: #F8FAFC;
+      padding: 1.5rem;
+      border-radius: 10px;
+      border: 1px solid #E2E8F0;
+    }
+
+    .input-group { display: flex; flex-direction: column; gap: 0.4rem; text-align: left; }
+    .input-group label { font-weight: 600; color: #374151; }
+    .input-group input, .input-group select { padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 1rem; }
+
+    .calc-result {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: bold;
+      color: #1E40AF;
+    }
+
+    .jogo-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #F8FAFC;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #E2E8F0;
+      text-align: center;
+    }
+
+    .fase-jogo { display: none; }
+    .fase-jogo.ativa { display: block; }
+    .controles-jogo { margin: 20px 0; }
+    .controles-jogo label { font-weight: bold; display: block; margin-bottom: 8px; }
+    .resultado-jogo { font-weight: bold; margin-top: 15px; min-height: 24px; }
+
+    .flashcards-controls {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .filter-btn {
+      background: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      color: #334155;
+      padding: 0.6rem 1.2rem;
+      border-radius: 9999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: #2563EB;
+      border-color: #2563EB;
+      color: #ffffff;
+    }
+
+    .flashcards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .flashcard-container { height: 220px; perspective: 1000px; cursor: pointer; }
+
+    .flashcard {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 16px;
+    }
+
+    .flashcard.flipped { transform: rotateY(180deg); }
+
+    .flashcard-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 16px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .flashcard-front { background-color: #0A192F; color: #ffffff; }
+
+    .flashcard-back {
+      background-color: #1E3A8A;
+      color: #ffffff;
+      transform: rotateY(180deg);
+      border-color: #2563EB;
+    }
+
+    .flashcard-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      width: fit-content;
+    }
+
+    .badge-mecanica { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+    .badge-termo { background: rgba(249, 115, 22, 0.2); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.4); }
+    .badge-eletro { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+
+    .flashcard-content {
+      font-size: 1rem;
+      line-height: 1.5;
+      font-weight: 500;
+      margin: auto 0;
+      text-align: center;
+    }
+
+    .flashcard-back .flashcard-content { color: #38bdf8; font-size: 1.15rem; }
+
+    .flashcard-footer {
+      font-size: 0.75rem;
+      color: #94A3B8;
+      text-align: center;
+    }
+
+    footer {
+      background-color: #0A192F;
+      color: #9CA3AF;
+      text-align: center;
+      padding: 1.5rem;
+      margin-top: auto;
+      font-size: 0.9rem;
+    }
+
+    footer strong { color: #ffffff; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <span class="logo-icon">⚛</span> Física Interativa
+    </div>
+    <nav>
+      <button class="nav-btn active" onclick="openTab('inicio')">Início</button>
+      <button class="nav-btn" onclick="openTab('mapa-mental')">Mapa Mental</button>
+      <button class="nav-btn" onclick="openTab('quiz')">Quiz</button>
+      <button class="nav-btn" onclick="openTab('jogo')">Jogo Educativo</button>
+      <button class="nav-btn" onclick="openTab('flashcards')">Flashcards</button>
+      <button class="nav-btn" onclick="openTab('calculadora')">Calculadora</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Aprenda Física de Forma Prática e Visual</h1>
+      <p>Explore conceitos, resolva desafios e teste seus conhecimentos com nossas ferramentas interativas.</p>
+    </section>
+
+    <div id="inicio" class="tab-content active">
+      <h2 class="section-title">Bem-vindo ao Física Interativa</h2>
+      <p style="margin-bottom: 1.5rem; color: #4B5563;">Escolha uma das ferramentas no menu superior para começar seus estudos de forma dinâmica e interativa.</p>
+      
+      <div class="cards-grid">
+        <div class="card">
+          <h3>Mapas Mentais</h3>
+          <p>Visualize os principais tópicos da física de forma estruturada e simples.</p>
+          <button class="action-btn" onclick="openTab('mapa-mental')">Acessar</button>
+        </div>
+        <div class="card">
+          <h3>Quiz Interativo</h3>
+          <p>Desafie seus conhecimentos com questões práticas e gabarito imediato.</p>
+          <button class="action-btn" onclick="openTab('quiz')">Acessar</button>
+        </div>
+        <div class="card">
+          <h3>Jogo Educativo</h3>
+          <p>Conserte a fábrica futurista aplicando conceitos de mecânica, termodinâmica e eletromagnetismo.</p>
+          <button class="action-btn" onclick="openTab('jogo')">Acessar</button>
+        </div>
+        <div class="card">
+          <h3>Flashcards</h3>
+          <p>Memorize fórmulas e leis da física com cards interativos em 3D.</p>
+          <button class="action-btn" onclick="openTab('flashcards')">Acessar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="mapa-mental" class="tab-content">
+      <h2 class="section-title">Mapas Mentais</h2>
+      <div class="cards-grid">
+        <div class="card">
+          <h3>Mecânica Clássica</h3>
+          <p>Leis de Newton, Cinemática e Dinâmica.</p>
+          <a href="Gemini_Generated_Image_c77777c77777c777 (1).jpg" target="_blank" class="action-btn">Ver Mapa</a>
+        </div>
+        <div class="card">
+          <h3>Termodinâmica</h3>
+          <p>Calorimetria, Leis da Termodinâmica e Gases.</p>
+          <a href="Gemini_Generated_Image_uww58uww58uww58u.jpg" target="_blank" class="action-btn">Ver Mapa</a>
+        </div>
+        <div class="card">
+          <h3>Eletromagnetismo</h3>
+          <p>Carga Elétrica, Circuitos e Campos Magnéticos.</p>
+          <a href="Gemini_Generated_Image_g0aydsg0aydsg0ay.jpg" target="_blank" class="action-btn">Ver Mapa</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ COMPLETO COM 10 QUESTÕES -->
+    <div id="quiz" class="tab-content">
+      <h2 class="section-title">Quiz de Física (10 Questões)</h2>
+      <form id="quiz-form" style="max-width: 700px; margin: 0 auto; text-align: left; display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <div class="quiz-card" style="background: #F8FAFC; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
+          <p style="font-weight: 600; color: #0A192F; margin-bottom: 0.75rem;">1. Qual é o enunciado conhecido como a Primeira Lei de Newton?</p>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q1" value="a"> Princípio Fundamental da Dinâmica</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q1" value="b"> Lei da Inércia</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q1" value="c"> Princípio da Ação e Reação</label>
+          </div>
+        </div>
+
+        <div class="quiz-card" style="background: #F8FAFC; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
+          <p style="font-weight: 600; color: #0A192F; margin-bottom: 0.75rem;">2. Segundo a Segunda Lei de Newton ($F = m \cdot a$), se a massa permanecer constante e a força dobrar, a aceleração irá:</p>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q2" value="a"> Dobrar</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q2" value="b"> Permanecer a mesma</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q2" value="c"> Reduzir pela metade</label>
+          </div>
+        </div>
+
+        <div class="quiz-card" style="background: #F8FAFC; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
+          <p style="font-weight: 600; color: #0A192F; margin-bottom: 0.75rem;">3. Qual é a unidade de medida do Trabalho e da Energia no Sistema Internacional (SI)?</p>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q3" value="a"> Newton (N)</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q3" value="b"> Joule (J)</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q3" value="c"> Watt (W)</label>
+          </div>
+        </div>
+
+        <div class="quiz-card" style="background: #F8FAFC; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
+          <p style="font-weight: 600; color: #0A192F; margin-bottom: 0.75rem;">4. Um objeto em movimento retilíneo uniforme (MRU) possui velocidade:</p>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q4" value="a"> Variável e aceleração constante</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q4" value="b"> Constante e aceleração nula</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q4" value="c"> Crescente</label>
+          </div>
+        </div>
+
+        <div class="quiz-card" style="background: #F8FAFC; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
+          <p style="font-weight: 600; color: #0A192F; margin-bottom: 0.75rem;">5. A Primeira Lei da Termodinâmica representa o princípio da conservação de qual grandeza?</p>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q5" value="a"> Massa</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q5" value="b"> Pressão</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q5" value="c"> Energia</label>
+          </div>
+        </div>
+
+        <div class="quiz-card" style="background: #F8FAFC; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
+          <p style="font-weight: 600; color: #0A192F; margin-bottom: 0.75rem;">6. Qual é a forma de transferência de calor que ocorre sem a necessidade de um meio material (ex: calor do Sol)?</p>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q6" value="a"> Radiação (Radiação eletromagnética)</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q6" value="b"> Condução</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q6" value="c"> Convecção</label>
+          </div>
+        </div>
+
+        <div class="quiz-card" style="background: #F8FAFC; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
+          <p style="font-weight: 600; color: #0A192F; margin-bottom: 0.75rem;">7. Em uma transformação isotérmica de um gás ideal, qual variável permanece constante?</p>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q7" value="a"> Pressão</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q7" value="b"> Temperatura</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q7" value="c"> Volume</label>
+          </div>
+        </div>
+
+        <div class="quiz-card" style="background: #F8FAFC; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
+          <p style="font-weight: 600; color: #0A192F; margin-bottom: 0.75rem;">8. Cargas elétricas de sinais opostos (uma positiva e uma negativa) exercem entre si força de:</p>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q8" value="a"> Repulsão</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q8" value="b"> Atração</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q8" value="c"> Anulação de campo</label>
+          </div>
+        </div>
+
+        <div class="quiz-card" style="background: #F8FAFC; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
+          <p style="font-weight: 600; color: #0A192F; margin-bottom: 0.75rem;">9. De acordo com a 1ª Lei de Ohm ($V = R \cdot I$), a resistência elétrica de um condutor ôhmico é dada por:</p>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q9" value="a"> Razão entre Tensão e Corrente ($R = V / I$)</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q9" value="b"> Produto da Tensão pela Corrente ($R = V \cdot I$)</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q9" value="c"> Soma da Tensão com a Corrente ($R = V + I$)</label>
+          </div>
+        </div>
+
+        <div class="quiz-card" style="background: #F8FAFC; padding: 1.25rem; border-radius: 8px; border: 1px solid #E2E8F0;">
+          <p style="font-weight: 600; color: #0A192F; margin-bottom: 0.75rem;">10. Qual fenômeno explica a geração de corrente elétrica por meio de um campo magnético variável (Lei de Faraday)?</p>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q10" value="a"> Indução Eletromagnética</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q10" value="b"> Efecto Joule</label>
+            <label style="background: #ffffff; padding: 0.6rem; border-radius: 6px; border: 1px solid #D1D5DB; cursor: pointer;"><input type="radio" name="q10" value="c"> Polarização Elétrica</label>
+          </div>
+        </div>
+
+        <button type="button" class="action-btn" onclick="calcularResultadoQuiz()" style="margin-top: 1rem; width: 100%; font-size: 1.1rem;">Enviar Respostas</button>
+      </form>
+
+      <div id="quiz-result" class="calc-result" style="display: none; margin-top: 1.5rem; max-width: 700px; margin-left: auto; margin-right: auto; font-size: 1.2rem;"></div>
+    </div>
+
+    <div id="jogo" class="tab-content">
+      <h2 class="section-title">Jogo Educativo: Física na Prática</h2>
+      <p style="color: #4B5563; margin-bottom: 1.5rem;">Ajude a consertar os componentes da fábrica futurista ajustando os parâmetros da física!</p>
+      
+      <div class="jogo-container">
+        <div id="fase1" class="fase-jogo ativa">
+          <h3 style="color: #0A192F; margin-bottom: 0.5rem;">1. Lançador de Cargas (Mecânica)</h3>
+          <p style="color: #4B5563; margin-bottom: 1rem;">A caixa pesa <strong>10 kg</strong>. Escolha a força certa para lançá-la até a plataforma!</p>
+          <div class="controles-jogo">
+            <label for="forca">Força (N): <span id="valForca">50</span></label>
+            <input type="range" id="forca" min="0" max="200" value="50" oninput="document.getElementById('valForca').innerText = this.value">
+          </div>
+          <button class="action-btn" onclick="testarMecanica()">Lançar Caixa</button>
+          <div id="res1" class="resultado-jogo"></div>
+        </div>
+
+        <div id="fase2" class="fase-jogo">
+          <h3 style="color: #0A192F; margin-bottom: 0.5rem;">2. Motor a Gás (Termodinâmica)</h3>
+          <p style="color: #4B5563; margin-bottom: 1rem;">Ajuste o calor para subir o pistão sem explodir o motor (Entre 300J e 500J).</p>
+          <div class="controles-jogo">
+            <label for="calor">Calor (J): <span id="valCalor">100</span></label>
+            <input type="range" id="calor" min="0" max="800" value="100" oninput="document.getElementById('valCalor').innerText = this.value">
+          </div>
+          <button class="action-btn" onclick="testarTermo()">Ligar Motor</button>
+          <div id="res2" class="resultado-jogo"></div>
+        </div>
+
+        <div id="fase3" class="fase-jogo">
+          <h3 style="color: #0A192F; margin-bottom: 0.5rem;">3. Desviador de Cargas (Eletromagnetismo)</h3>
+          <p style="color: #4B5563; margin-bottom: 1rem;">Ajuste o campo magnético para a carga atingir exatamente a intensidade de 5 Tesla.</p>
+          <div class="controles-jogo">
+            <label for="campo">Campo Magnético (T): <span id="valCampo">1</span></label>
+            <input type="range" id="campo" min="0" max="10" value="1" oninput="document.getElementById('valCampo').innerText = this.value">
+          </div>
+          <button class="action-btn" onclick="testarEletro()">Disparar Carga</button>
+          <div id="res3" class="resultado-jogo"></div>
+        </div>
+
+        <div id="vitoria" class="fase-jogo">
+          <h3 style="color: #15803D; font-size: 1.5rem; margin-bottom: 0.5rem;">🎉 Parabéns!</h3>
+          <p style="color: #4B5563; margin-bottom: 1rem;">Você aplicou os conceitos de física e consertou a fábrica!</p>
+          <button class="action-btn" onclick="reiniciarJogo()">Jogar Novamente</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="flashcards" class="tab-content">
+      <h2 class="section-title">Flashcards Interativos</h2>
+      <p style="color: #4B5563; margin-bottom: 1.5rem;">Clique no card para girar e ver a fórmula/resposta. Filtre pelas áreas da física abaixo:</p>
+
+      <div class="flashcards-controls">
+        <button class="filter-btn active" onclick="filterFlashcards('todos', this)">Todos</button>
+        <button class="filter-btn" onclick="filterFlashcards('mecanica', this)">Mecânica Clássica</button>
+        <button class="filter-btn" onclick="filterFlashcards('termo', this)">Termodinâmica</button>
+        <button class="filter-btn" onclick="filterFlashcards('eletro', this)">Eletromagnetismo</button>
+      </div>
+
+      <div class="flashcards-grid" id="flashcards-grid"></div>
+    </div>
+
+    <div id="calculadora" class="tab-content">
+      <h2 class="section-title">Calculadoras de Física</h2>
+      <p style="color: #4B5563; margin-bottom: 1.5rem; text-align: center;">Escolha o assunto e a fórmula que deseja calcular:</p>
+
+      <div class="calc-menu">
+        <button class="calc-menu-btn active" onclick="openCalcSubtab('calc-newton', this)">2ª Lei de Newton</button>
+        <button class="calc-menu-btn" onclick="openCalcSubtab('calc-cinetica', this)">Energia Cinética</button>
+        <button class="calc-menu-btn" onclick="openCalcSubtab('calc-calor', this)">Calor Sensível</button>
+        <button class="calc-menu-btn" onclick="openCalcSubtab('calc-ohm', this)">1ª Lei de Ohm</button>
+      </div>
+
+      <div id="calc-newton" class="calc-subtab active">
+        <div class="calc-container">
+          <h3 style="color: #0A192F; text-align: center;">2ª Lei de Newton ($F = m \\cdot a$)</h3>
+          <div class="input-group">
+            <label for="massa">Massa ($m$) [kg]:</label>
+            <input type="number" id="massa" placeholder="Ex: 10">
+          </div>
+          <div class="input-group">
+            <label for="aceleracao">Aceleração ($a$) [m/s²]:</label>
+            <input type="number" id="aceleracao" placeholder="Ex: 2">
+          </div>
+          <button class="action-btn" onclick="calcularForca()">Calcular Força</button>
+          <div class="calc-result" id="resultado-calc-newton">Insira os valores e clique em calcular.</div>
+        </div>
+      </div>
+
+      <div id="calc-cinetica" class="calc-subtab">
+        <div class="calc-container">
+          <h3 style="color: #0A192F; text-align: center;">Energia Cinética ($E_c = \\frac{1}{2}m v^2$)</h3>
+          <div class="input-group">
+            <label for="massa-ec">Massa ($m$) [kg]:</label>
+            <input type="number" id="massa-ec" placeholder="Ex: 5">
+          </div>
+          <div class="input-group">
+            <label for="vel-ec">Velocidade ($v$) [m/s]:</label>
+            <input type="number" id="vel-ec" placeholder="Ex: 10">
+          </div>
+          <button class="action-btn" onclick="calcularEnergiaCinetica()">Calcular Energia</button>
+          <div class="calc-result" id="resultado-calc-cinetica">Insira os valores e clique em calcular.</div>
+        </div>
+      </div>
+
+      <div id="calc-calor" class="calc-subtab">
+        <div class="calc-container">
+          <h3 style="color: #0A192F; text-align: center;">Calor Sensível ($Q = m \\cdot c \\cdot \\Delta T$)</h3>
+          <div class="input-group">
+            <label for="massa-q">Massa ($m$) [g]:</label>
+            <input type="number" id="massa-q" placeholder="Ex: 200">
+          </div>
+          <div class="input-group">
+            <label for="c-especifico">Calor Específico ($c$) [cal/g°C]:</label>
+            <input type="number" id="c-especifico" value="1" step="0.01" placeholder="Água = 1">
+          </div>
+          <div class="input-group">
+            <label for="delta-t">Variação de Temp. ($\Delta T$) [°C]:</label>
+            <input type="number" id="delta-t" placeholder="Ex: 30">
+          </div>
+          <button class="action-btn" onclick="calcularCalorSensivel()">Calcular Calor</button>
+          <div class="calc-result" id="resultado-calc-calor">Insira os valores e clique em calcular.</div>
+        </div>
+      </div>
+
+      <div id="calc-ohm" class="calc-subtab">
+        <div class="calc-container">
+          <h3 style="color: #0A192F; text-align: center;">1ª Lei de Ohm ($V = R \\cdot I$)</h3>
+          <div class="input-group">
+            <label for="resistencia">Resistência ($R$) [$\Omega$]:</label>
+            <input type="number" id="resistencia" placeholder="Ex: 100">
+          </div>
+          <div class="input-group">
+            <label for="corrente">Corrente ($I$) [A]:</label>
+            <input type="number" id="corrente" placeholder="Ex: 2">
+          </div>
+          <button class="action-btn" onclick="calcularLeiOhm()">Calcular Tensão</button>
+          <div class="calc-result" id="resultado-calc-ohm">Insira os valores e clique em calcular.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Criado por <strong>Rafaella</strong> | © 2026 Física Interativa. Todos os direitos reservados.</p>
+  </footer>
+
+  <script>
+    function openTab(tabId) {
+      const contents = document.querySelectorAll('.tab-content');
+      contents.forEach(content => content.classList.remove('active'));
+
+      const buttons = document.querySelectorAll('.nav-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      document.getElementById(tabId).classList.add('active');
+
+      const activeBtn = Array.from(buttons).find(btn => 
+        btn.getAttribute('onclick').includes(tabId)
+      );
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if ((tabId === 'flashcards' || tabId === 'calculadora') && window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise();
+      }
+    }
+
+    function openCalcSubtab(subtabId, btn) {
+      document.querySelectorAll('.calc-subtab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.calc-menu-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(subtabId).classList.add('active');
+      btn.classList.add('active');
+
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise();
+      }
+    }
+
+    function calcularForca() {
+      const massa = parseFloat(document.getElementById('massa').value);
+      const aceleracao = parseFloat(document.getElementById('aceleracao').value);
+      const resultDiv = document.getElementById('resultado-calc-newton');
+
+      if (isNaN(massa) || isNaN(aceleracao)) {
+        resultDiv.textContent = "Por favor, insira números válidos.";
+        return;
+      }
+
+      const forca = massa * aceleracao;
+      resultDiv.textContent = `Força resultante (F) = ${forca.toFixed(2)} N`;
+    }
+
+    function calcularEnergiaCinetica() {
+      const m = parseFloat(document.getElementById('massa-ec').value);
+      const v = parseFloat(document.getElementById('vel-ec').value);
+      const resultDiv = document.getElementById('resultado-calc-cinetica');
+
+      if (isNaN(m) || isNaN(v)) {
+        resultDiv.textContent = "Por favor, insira números válidos.";
+        return;
+      }
+
+      const ec = 0.5 * m * Math.pow(v, 2);
+      resultDiv.textContent = `Energia Cinética (Ec) = ${ec.toFixed(2)} J`;
+    }
+
+    function calcularCalorSensivel() {
+      const m = parseFloat(document.getElementById('massa-q').value);
+      const c = parseFloat(document.getElementById('c-especifico').value);
+      const dt = parseFloat(document.getElementById('delta-t').value);
+      const resultDiv = document.getElementById('resultado-calc-calor');
+
+      if (isNaN(m) || isNaN(c) || isNaN(dt)) {
+        resultDiv.textContent = "Por favor, insira números válidos.";
+        return;
+      }
+
+      const q = m * c * dt;
+      resultDiv.textContent = `Quantidade de Calor (Q) = ${q.toFixed(2)} cal`;
+    }
+
+    function calcularLeiOhm() {
+      const r = parseFloat(document.getElementById('resistencia').value);
+      const i = parseFloat(document.getElementById('corrente').value);
+      const resultDiv = document.getElementById('resultado-calc-ohm');
+
+      if (isNaN(r) || isNaN(i)) {
+        resultDiv.textContent = "Por favor, insira números válidos.";
+        return;
+      }
+
+      const v = r * i;
+      resultDiv.textContent = `Tensão Elétrica (V) = ${v.toFixed(2)} V`;
+    }
+
+    function calcularResultadoQuiz() {
+      const gabarito = { q1: 'b', q2: 'a', q3: 'b', q4: 'b', q5: 'c', q6: 'a', q7: 'b', q8: 'b', q9: 'a', q10: 'a' };
+      let acertos = 0;
+      for (let i = 1; i <= 10; i++) {
+        const sel = document.querySelector(`input[name="q${i}"]:checked`);
+        if (sel && sel.value === gabarito[`q${i}`]) acertos++;
+      }
+      const res = document.getElementById('quiz-result');
+      res.style.display = 'block';
+      res.innerHTML = `Você acertou <strong>${acertos}</strong> de <strong>10</strong> perguntas! 🎉`;
+    }
+
+    function testarMecanica() {
+      let f = document.getElementById('forca').value;
+      let res = document.getElementById('res1');
+      if (f >= 95 && f <= 110) {
+        res.style.color = 'green';
+        res.innerText = "Perfeito! A força venceu o peso na medida certa.";
+        setTimeout(() => proximaFase('fase1', 'fase2'), 1500);
+      } else if (f < 95) {
+        res.style.color = 'red';
+        res.innerText = "Muito fraco! A gravidade venceu.";
+      } else {
+        res.style.color = 'red';
+        res.innerText = "Muita força! A caixa passou direto da plataforma.";
+      }
+    }
+
+    function testarTermo() {
+      let c = document.getElementById('calor').value;
+      let res = document.getElementById('res2');
+      if (c >= 300 && c <= 500) {
+        res.style.color = 'green';
+        res.innerText = "Sucesso! O gás expandiu e moveu o pistão com segurança.";
+        setTimeout(() => proximaFase('fase2', 'fase3'), 1500);
+      } else if (c < 300) {
+        res.style.color = 'red';
+        res.innerText = "Pouco calor! O gás não expandiu o suficiente.";
+      } else {
+        res.style.color = 'red';
+        res.innerText = "Muito calor! O motor superaqueceu!";
+      }
+    }
+
+    function testarEletro() {
+      let b = document.getElementById('campo').value;
+      let res = document.getElementById('res3');
+      if (b == 5) {
+        res.style.color = 'green';
+        res.innerText = "Excelente! A carga fez a curva perfeita até o alvo.";
+        setTimeout(() => proximaFase('fase3', 'vitoria'), 1500);
+      } else {
+        res.style.color = 'red';
+        res.innerText = "A trajetória errou o alvo. Tente ajustar o campo magnético.";
+      }
+    }
+
+    function proximaFase(atual, proxima) {
+      document.getElementById(atual).classList.remove('ativa');
+      document.getElementById(proxima).classList.add('ativa');
+    }
+
+    function reiniciarJogo() {
+      document.getElementById('vitoria').classList.remove('ativa');
+      document.getElementById('fase1').classList.add('ativa');
+      document.getElementById('res1').innerText = '';
+      document.getElementById('res2').innerText = '';
+      document.getElementById('res3').innerText = '';
+    }
+
+    const flashcardsData = [
+      { cat: 'mecanica', catName: 'Mecânica Clássica', p: 'Qual é a 2ª Lei de Newton?', r: '$\\vec{F}_{res} = m \\cdot \\vec{a}$' },
+      { cat: 'mecanica', catName: 'Mecânica Clássica', p: 'Como se calcula a Energia Cinética?', r: '$E_c = \\frac{1}{2}m v^2$' },
+      { cat: 'mecanica', catName: 'Mecânica Clássica', p: 'Qual a fórmula da Energia Potencial Gravitacional?', r: '$E_p = m \\cdot g \\cdot h$' },
+      { cat: 'mecanica', catName: 'Mecânica Clássica', p: 'O que diz o Teorema do Impulso?', r: '$\\vec{I} = \\Delta \\vec{p} = \\vec{F}_{res} \\cdot \\Delta t$' },
+      { cat: 'termo', catName: 'Termodinâmica', p: 'Qual a equação da 1ª Lei da Termodinâmica?', r: '$\\Delta U = Q - W$' },
+      { cat: 'termo', catName: 'Termodinâmica', p: 'Qual é a Equação de Estado dos Gases Ideais?', r: '$P \\cdot V = n \\cdot R \\cdot T$' },
+      { cat: 'termo', catName: 'Termodinâmica', p: 'Qual a fórmula do Calor Sensível?', r: '$Q = m \\cdot c \\cdot \\Delta T$' },
+      { cat: 'eletro', catName: 'Eletromagnetismo', p: 'Qual é a Lei de Coulomb?', r: '$F = k_e \\cdot \\frac{|q_1 \\cdot q_2|}{r^2}$' },
+      { cat: 'eletro', catName: 'Eletromagnetismo', p: 'Qual é a 1ª Lei de Ohm?', r: '$V = R \\cdot I$' },
+      { cat: 'eletro', catName: 'Eletromagnetismo', p: 'O que estabelece a Lei de Faraday-Lenz?', r: '$\\mathcal{E} = -\\frac{d\\Phi_B}{dt}$' }
+    ];
+
+    function renderFlashcards(filter = 'todos') {
+      const container = document.getElementById('flashcards-grid');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const filtered = filter === 'todos' 
+        ? flashcardsData 
+        : flashcardsData.filter(card => card.cat === filter);
+
+      filtered.forEach((card) => {
+        const badgeClass = `badge-${card.cat}`;
+        const cardElement = document.createElement('div');
+        cardElement.className = 'flashcard-container';
+        cardElement.innerHTML = `
+          <div class="flashcard" onclick="this.classList.toggle('flipped')">
+            <div class="flashcard-face flashcard-front">
+              <span class="flashcard-badge ${badgeClass}">${card.catName}</span>
+              <p class="flashcard-content">${card.p}</p>
+              <div class="flashcard-footer">🔄 Clique para virar</div>
+            </div>
+            <div class="flashcard-face flashcard-back">
+              <span class="flashcard-badge ${badgeClass}">Resposta</span>
+              <p class="flashcard-content">${card.r}</p>
+              <div class="flashcard-footer">🔄 Clique para voltar</div>
+            </div>
+          </div>
+        `;
+        container.appendChild(cardElement);
+      });
+
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise();
+      }
+    }
+
+    function filterFlashcards(category, btn) {
+      document.querySelectorAll('.flashcards-controls .filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderFlashcards(category);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => renderFlashcards());
+  </script>
+</body>
+</html>
